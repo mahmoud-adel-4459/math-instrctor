@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   Award,
 } from 'lucide-react';
-import { SUBJECT_BRANCHES, INSTRUCTOR_NAME, INSTRUCTOR_TITLE } from '../../utils/constants';
+import { SUBJECT_BRANCHES, INSTRUCTOR_NAME, INSTRUCTOR_TITLE, PLATFORM_MOTTO } from '../../utils/constants';
 
 export const Footer: React.FC = () => {
   return (
@@ -23,16 +23,21 @@ export const Footer: React.FC = () => {
           {/* Brand Info & Instructor Bio */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center">
-              <img
-                src="/logo.png"
-                alt="مستر قابيل - Math with Kabil"
-                className="h-20 sm:h-24 lg:h-28 w-auto object-contain rounded-2xl"
-              />
+              <Link to="/">
+                <img
+                  src="/logo.png"
+                  alt="ARTMEL Math with Kabil"
+                  className="h-16 sm:h-20 w-auto object-contain rounded-2xl"
+                />
+              </Link>
             </div>
 
             <p className="text-sm leading-relaxed text-slate-300">
               المنصة التعليمية الأولى المتخصصة في شرح وتسهيل علوم الرياضيات للثانوية العامة والإعدادية، تحت إشراف{' '}
-              <strong className="text-blue-400 font-bold">{INSTRUCTOR_NAME}</strong> - {INSTRUCTOR_TITLE}.
+              <strong className="text-blue-400 font-bold">{INSTRUCTOR_NAME}</strong> — {INSTRUCTOR_TITLE}.
+            </p>
+            <p className="text-xs text-cyan-300 font-semibold italic">
+              «{PLATFORM_MOTTO}»
             </p>
 
             <div className="flex items-center gap-3 pt-2">
@@ -163,10 +168,12 @@ export const Footer: React.FC = () => {
               قيمة تك
             </a>
           </p>
-          <div className="flex items-center gap-6 text-slate-400">
-            <Link to="/faq" className="hover:text-white transition-colors">الأسئلة الشائعة</Link>
-            <Link to="/about" className="hover:text-white transition-colors">عن المنصة</Link>
-            <a href="#" className="hover:text-white transition-colors">سياسة الخصوصية</a>
+          <div className="flex items-center gap-4 text-slate-400">
+            <Link to="/privacy" className="hover:text-cyan-400 transition-colors">سياسة الخصوصية</Link>
+            <span>•</span>
+            <Link to="/terms" className="hover:text-cyan-400 transition-colors">شروط الاستخدام</Link>
+            <span>•</span>
+            <Link to="/contact" className="hover:text-cyan-400 transition-colors">تواصل معنا</Link>
           </div>
         </div>
       </div>

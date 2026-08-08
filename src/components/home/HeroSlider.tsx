@@ -8,7 +8,7 @@ import {
   PlayCircle,
 } from 'lucide-react';
 import { Button } from '../common/Button';
-import { INSTRUCTOR_NAME } from '../../utils/constants';
+import { INSTRUCTOR_NAME, PLATFORM_MOTTO } from '../../utils/constants';
 
 interface ImageSlide {
   id: number;
@@ -30,34 +30,34 @@ export const HeroSlider: React.FC = () => {
     {
       id: 0,
       imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1920&auto=format&fit=crop&q=80',
-      badgeText: 'الدفعة الماسية 2026',
+      badgeText: 'خبرة تتجاوز 27 عامًا',
       title: `احترف الرياضيات واضمن درجات التقفيل مع ${INSTRUCTOR_NAME}`,
-      subtitle: 'شرح مفيض وشامل لكل أفكار التفاضل والتكامل، الجبر والهندسة، والميكانيكا بنظام البابل شيت الحديث.',
+      subtitle: `منصة تعليمية أُنشئت لتكون رفيقًا لكل طالب يسعى إلى التفوق وإتقان الرياضيات. «${PLATFORM_MOTTO}»`,
       primaryBtnText: 'تصفح الكورسات والمنهج',
       primaryBtnLink: '/courses',
-      secondaryBtnText: 'جرب حصة مجانية',
-      secondaryBtnLink: '/lesson/les_calc_101',
+      secondaryBtnText: 'عن المنصة والأستاذ',
+      secondaryBtnLink: '/about',
     },
     {
       id: 1,
       imageUrl: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=1920&auto=format&fit=crop&q=80',
-      badgeText: 'بنك الامتحانات الإلكترونية',
-      title: 'تدرب على آلاف أسئلة البابل شيت مع التصحيح الفوري',
-      subtitle: 'اختبارات تفاعلية محاكية للامتحانات الرسمية مع نماذج إجابة شارحة بالخطوات الكاملة لكل مسألة.',
+      badgeText: 'نظام البابل شيت الحديث 2026',
+      title: 'تدرب على أحدث أسئلة امتحانات الثانوية مع التصحيح الفوري',
+      subtitle: 'اختبارات تفاعلية محاكية للامتحانات الرسمية مع نماذج إجابة شارحة بالخطوات التوضيحية.',
       primaryBtnText: 'دخول بنك الامتحانات',
       primaryBtnLink: '/exams',
-      secondaryBtnText: 'شاهد طريقة التصحيح',
-      secondaryBtnLink: '/exams',
+      secondaryBtnText: 'جرب كويز تفاعلي',
+      secondaryBtnLink: '/my-courses/calculus-third-secondary/quiz/quiz_calc_1',
     },
     {
       id: 2,
       imageUrl: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=1920&auto=format&fit=crop&q=80',
-      badgeText: 'مذكرات ومراجعات PDF',
-      title: 'مذكرات ملونة وخرائط ذهنية مجمعة لقوانين المنهج',
-      subtitle: 'حمل مذكرات الشرح والتمارين المحلولة الجاهزة للطباعة مع مراجعات ليلة الامتحان للعين السريعة.',
-      primaryBtnText: 'تحميل المذكرات',
-      primaryBtnLink: '/lesson/les_calc_101',
-      secondaryBtnText: 'عن المنصة والأستاذ',
+      badgeText: 'مذكرات ومجموعاتPDF',
+      title: 'شرح مبسط، خطط دراسية واضحة ومراجعات شاملة',
+      subtitle: 'حمل مذكرات الشرح والتمارين المحلولة مع متابعة دورية تساعدك على بناء الثقة بنفسك.',
+      primaryBtnText: 'استكشف المنهج',
+      primaryBtnLink: '/courses',
+      secondaryBtnText: 'عن الأستاذ والخبرة',
       secondaryBtnLink: '/about',
     },
   ];
@@ -113,8 +113,8 @@ export const HeroSlider: React.FC = () => {
                 
                 {/* Badge */}
                 <div>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-blue-600/90 text-white text-[11px] sm:text-xs font-black shadow-lg shadow-blue-600/40 backdrop-blur-md border border-cyan-400/30">
-                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-300" />
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-slate-900/90 text-blue-300 text-[11px] sm:text-xs font-bold border border-blue-500/30 shadow-md backdrop-blur-md">
+                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
                     <span>{slide.badgeText}</span>
                   </span>
                 </div>

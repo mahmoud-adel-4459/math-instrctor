@@ -48,21 +48,21 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-3 z-50 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full transition-all">
       {/* Floating Capsule Header Container */}
-      <div className="relative bg-slate-900/85 backdrop-blur-2xl border border-blue-500/25 shadow-2xl shadow-blue-950/70 rounded-3xl sm:rounded-full px-4 sm:px-6 py-1.5 flex items-center justify-between gap-3">
+      <div className="relative bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl shadow-slate-950/80 rounded-3xl sm:rounded-full px-4 sm:px-6 py-2 flex items-center justify-between gap-3">
         
         {/* Brand Logo */}
         <div className="flex items-center">
           <Link to="/" className="group flex items-center">
             <img
               src="/logo.png"
-              alt="مستر قابيل - Math with Kabil"
-              className="h-8 sm:h-9 lg:h-10 w-auto object-contain rounded-lg group-hover:scale-105 transition-transform"
+              alt="ARTMEL Math with Kabil"
+              className="h-11 sm:h-13 lg:h-14 w-auto object-contain group-hover:scale-105 transition-transform"
             />
           </Link>
         </div>
 
         {/* Center Floating Navigation Tabs */}
-        <nav className="hidden md:flex items-center gap-1 bg-slate-950/60 p-1 rounded-full border border-blue-900/30">
+        <nav className="hidden md:flex items-center gap-1 bg-slate-950/40 p-1 rounded-full border border-white/5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -70,9 +70,9 @@ export const Navbar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-extrabold transition-all relative ${
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 scale-105'
+                    ? 'bg-blue-600 text-white shadow-md'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                 }`}
               >

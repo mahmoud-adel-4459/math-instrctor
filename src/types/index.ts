@@ -56,6 +56,7 @@ export interface Chapter {
   totalDurationMinutes: number;
   lessonsCount: number;
   lessons: VideoLesson[];
+  quizId?: string; // Optional quiz per chapter
   examId?: string; // Optional exam for the entire chapter
   isUnlocked?: boolean;
 }
@@ -78,6 +79,8 @@ export interface Course {
   discountPrice?: number;
   chapters: Chapter[];
   features: string[];
+  requirements?: string[];
+  whatYouWillLearn?: string[];
   isFeatured?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -93,7 +96,8 @@ export interface QuestionOption {
 
 export interface Question {
   id: string;
-  examId: string;
+  examId?: string;
+  quizId?: string;
   text: string; // Supports LaTeX or Math syntax
   image?: string;
   type: QuestionType;
@@ -101,6 +105,36 @@ export interface Question {
   correctOptionId: string;
   points: number;
   explanation?: string; // الشرح النموذجي للإجابة
+}
+
+export interface Quiz {
+  id: string;
+  title: string;
+  courseId: string;
+  chapterId?: string;
+  lessonId?: string;
+  description: string;
+  durationMinutes: number;
+  passPercentage: number;
+  totalPoints: number;
+  questionsCount: number;
+  questions: Question[];
+  attemptsAllowed: number;
+}
+
+export interface QuizAttempt {
+  id: string;
+  quizId: string;
+  quizTitle: string;
+  courseSlug: string;
+  studentId: string;
+  answers: Record<string, string>; // questionId -> optionId
+  score: number;
+  totalPoints: number;
+  percentage: number;
+  passed: boolean;
+  completedAt: string;
+  timeSpentSeconds: number;
 }
 
 export interface Exam {
@@ -121,10 +155,13 @@ export interface Exam {
 export interface ExamAttempt {
   id: string;
   examId: string;
+  examTitle: string;
+  courseSlug: string;
   studentId: string;
   answers: Record<string, string>; // questionId -> optionId
   score: number;
   totalPoints: number;
+  percentage: number;
   passed: boolean;
   startedAt: string;
   completedAt: string;
@@ -136,10 +173,44 @@ export interface StudentProgress {
   courseId: string;
   completedLessonIds: string[];
   completedExamIds: string[];
+  completedQuizIds: string[];
   lastStudiedLessonId?: string;
   overallPercentage: number;
   totalHoursWatched: number;
   lastStudiedAt: string;
+}
+
+export interface Certificate {
+  id: string;
+  courseId: string;
+  courseTitle: string;
+  studentName: string;
+  issueDate: string;
+  grade: string;
+  scorePercentage: number;
+  downloadUrl?: string;
+}
+
+export type OrderStatus = 'completed' | 'pending' | 'failed' | 'refunded';
+
+export interface Order {
+  id: string;
+  courseId: string;
+  courseTitle: string;
+  amount: number;
+  paymentMethod: string;
+  status: OrderStatus;
+  createdAt: string;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'course' | 'exam' | 'quiz' | 'system';
+  isRead: boolean;
+  createdAt: string;
+  link?: string;
 }
 
 export interface NavItem {
@@ -148,4 +219,18 @@ export interface NavItem {
   icon?: string;
   badge?: string;
   children?: NavItem[];
+}
+
+export interface BreadcrumbItem {
+  label: string;
+  path?: string;
+}
+
+export interface SEOConfig {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogImage?: string;
+  ogType?: string;
+  noindex?: boolean;
 }

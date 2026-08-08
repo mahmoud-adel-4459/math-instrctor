@@ -7,10 +7,20 @@ import {
   FileText,
   Star,
   Zap,
+  Sparkles,
+  Award,
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
-import { SUBJECT_BRANCHES, GRADE_LEVELS } from '../utils/constants';
+import {
+  SUBJECT_BRANCHES,
+  GRADE_LEVELS,
+  INSTRUCTOR_NAME,
+  INSTRUCTOR_TITLE,
+  PLATFORM_MOTTO,
+  QURAN_VERSES,
+  HADITH,
+} from '../utils/constants';
 import { useCourseStore } from '../store/useCourseStore';
 import { formatCurrency } from '../utils/formatters';
 import { HeroSlider } from '../components/home/HeroSlider';
@@ -24,13 +34,47 @@ export const HomePage: React.FC = () => {
       {/* HERO SLIDER CAROUSEL */}
       <HeroSlider />
 
+      {/* MOTTO & SPIRITUAL BANNER */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="glass-panel p-8 sm:p-10 rounded-3xl border border-blue-900/40 text-center space-y-6 shadow-2xl bg-gradient-to-br from-blue-950/40 via-slate-900/90 to-blue-950/40 glow-blue">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-bold">
+            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <span>رسالة وشعار المنصة</span>
+          </div>
+
+          <h2 className="text-xl sm:text-3xl font-black text-amber-300 font-serif leading-relaxed max-w-3xl mx-auto">
+            «{QURAN_VERSES[0].text}»
+          </h2>
+
+          <p className="text-xs sm:text-sm text-cyan-200 font-semibold max-w-2xl mx-auto">
+            قال رسول الله ﷺ: «{HADITH}»
+          </p>
+
+          <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+            <div className="flex items-center gap-3 text-right">
+              <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
+                <Award className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-extrabold text-white">{INSTRUCTOR_NAME}</h4>
+                <p className="text-slate-400">{INSTRUCTOR_TITLE}</p>
+              </div>
+            </div>
+
+            <div className="px-4 py-2 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs font-extrabold text-blue-300">
+              «{PLATFORM_MOTTO}»
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* MATH SUBJECT BRANCHES SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-3 mb-12">
           <Badge variant="cyan">التخصص والدقة</Badge>
           <h2 className="text-3xl font-extrabold text-white">فروع مادة الرياضيات بالشرح المبسط</h2>
           <p className="text-sm text-slate-400 max-w-2xl mx-auto">
-            تغطي منصتنا جميع فروع الرياضيات للثانوية العامة والإعدادية مقسمة ومبسطة بشكل علمي مدروس.
+            تغطي منصتنا جميع فروع الرياضيات للثانوية العامة والإعدادية مقسمة ومبسطة بشكل علمي مدروس مع {INSTRUCTOR_NAME}.
           </p>
         </div>
 
@@ -142,9 +186,9 @@ export const HomePage: React.FC = () => {
                   )}
                 </div>
 
-                <Link to="/lesson/les_calc_101">
+                <Link to={`/courses/${course.slug}`}>
                   <Button variant="primary" size="sm" icon={ArrowLeft} iconPosition="left">
-                    ابدأ التعلم
+                    عرض الكورس
                   </Button>
                 </Link>
               </div>

@@ -150,10 +150,13 @@ export const useExamStore = create<ExamState>((set, get) => ({
     const attempt: ExamAttempt = {
       id: `att_${Date.now()}`,
       examId: currentExam.id,
+      examTitle: currentExam.title,
+      courseSlug: 'calculus-third-secondary',
       studentId,
       answers,
       score: totalScore,
       totalPoints: currentExam.totalPoints,
+      percentage: Math.round(percentage),
       passed,
       startedAt: new Date().toISOString(),
       completedAt: new Date().toISOString(),
