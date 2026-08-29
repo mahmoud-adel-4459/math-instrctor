@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance } from 'axios';
 
-const BASE_URL = ((import.meta.env.VITE_API_URL as string) || 'http://localhost:8000').replace(/\/$/, '');
+const rawApiUrl = ((import.meta.env.VITE_API_URL as string) || 'http://localhost:8000').trim();
+const BASE_URL = rawApiUrl.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
 
 const TOKEN_KEY = 'student-access-token';
 
