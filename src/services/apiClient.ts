@@ -1,6 +1,9 @@
 import axios, { type AxiosInstance } from 'axios';
 
-const rawApiUrl = ((import.meta.env.VITE_API_URL as string) || 'http://localhost:8000').trim();
+let rawApiUrl = ((import.meta.env.VITE_API_URL as string) || 'http://localhost:8000').trim();
+if (rawApiUrl && !rawApiUrl.startsWith('http://') && !rawApiUrl.startsWith('https://')) {
+  rawApiUrl = `https://${rawApiUrl}`;
+}
 const BASE_URL = rawApiUrl.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
 
 const TOKEN_KEY = 'student-access-token';
