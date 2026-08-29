@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
 
-let rawApiUrl = ((import.meta.env.VITE_API_URL as string) || 'http://localhost:8000').trim();
+let rawApiUrl = ((import.meta.env.VITE_API_URL as string) || 'https://math.vfitapp.site').trim();
 if (rawApiUrl && !rawApiUrl.startsWith('http://') && !rawApiUrl.startsWith('https://')) {
   rawApiUrl = `https://${rawApiUrl}`;
 }
