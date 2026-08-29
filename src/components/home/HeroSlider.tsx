@@ -70,7 +70,10 @@ function resolveImageUrl(imagePath?: string, fallbackIndex = 0): string {
   if (imagePath.startsWith('/storage') || imagePath.startsWith('/media') || imagePath.startsWith('/uploads')) {
     return `${apiOrigin}${imagePath}`;
   }
-  return imagePath;
+  if (!imagePath.startsWith('/')) {
+    return `${apiOrigin}/storage/${imagePath}`;
+  }
+  return `${apiOrigin}${imagePath}`;
 }
 
 function mapHeroSlides(rawSlides: any[]): ImageSlide[] {
