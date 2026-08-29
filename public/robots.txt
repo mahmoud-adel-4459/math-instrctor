@@ -14,7 +14,6 @@ Disallow: /my-courses
 Disallow: /my-courses/*
 Disallow: /results
 Disallow: /certificates
-Disallow: /orders
 Disallow: /profile
 Disallow: /notifications
 Disallow: /login

@@ -27,6 +27,7 @@ export interface User {
   gradeLevel?: GradeLevel;
   enrolledCourseIds: string[];
   joinedAt: string;
+  roles?: string[];
 }
 
 export interface VideoLesson {
@@ -35,7 +36,8 @@ export interface VideoLesson {
   title: string;
   description: string;
   durationMinutes: number;
-  videoUrl: string; // Embed or HLS video link
+  videoUrl: string;
+  videoError?: string;
   isFreePreview: boolean;
   isCompleted?: boolean;
   order: number;
@@ -56,8 +58,10 @@ export interface Chapter {
   totalDurationMinutes: number;
   lessonsCount: number;
   lessons: VideoLesson[];
-  quizId?: string; // Optional quiz per chapter
-  examId?: string; // Optional exam for the entire chapter
+  quizId?: string;
+  examId?: string;
+  quizIds?: string[];
+  examIds?: string[];
   isUnlocked?: boolean;
 }
 
@@ -84,6 +88,11 @@ export interface Course {
   isFeatured?: boolean;
   createdAt: string;
   updatedAt: string;
+  lessonsCount?: number;
+  durationMinutes?: number;
+  progressPercentage?: number;
+  completedLessons?: number;
+  totalLessons?: number;
 }
 
 export type QuestionType = 'multiple_choice' | 'true_false' | 'essay';
@@ -102,9 +111,9 @@ export interface Question {
   image?: string;
   type: QuestionType;
   options: QuestionOption[];
-  correctOptionId: string;
+  correctOptionId?: string;
   points: number;
-  explanation?: string; // الشرح النموذجي للإجابة
+  explanation?: string;
 }
 
 export interface Quiz {
@@ -122,19 +131,30 @@ export interface Quiz {
   attemptsAllowed: number;
 }
 
+export interface AttemptReviewAnswer {
+  questionId: string;
+  questionText: string;
+  selectedOptionIds: string[];
+  isCorrect: boolean;
+  pointsAwarded: number;
+  explanation?: string;
+  correctOptionIds: string[];
+}
+
 export interface QuizAttempt {
   id: string;
   quizId: string;
   quizTitle: string;
   courseSlug: string;
   studentId: string;
-  answers: Record<string, string>; // questionId -> optionId
+  answers: Record<string, string>;
   score: number;
   totalPoints: number;
   percentage: number;
   passed: boolean;
   completedAt: string;
   timeSpentSeconds: number;
+  review?: AttemptReviewAnswer[];
 }
 
 export interface Exam {
@@ -166,6 +186,32 @@ export interface ExamAttempt {
   startedAt: string;
   completedAt: string;
   timeSpentSeconds: number;
+  review?: AttemptReviewAnswer[];
+}
+
+export interface StudentDashboard {
+  enrolledCourses: number;
+  completedCourses: number;
+  activeCourses: number;
+  unreadNotifications: number;
+  continueLearning: {
+    courseId: string;
+    courseTitle: string;
+    courseSlug?: string;
+    thumbnail?: string;
+    progressPercentage: number;
+    completedLessons: number;
+    totalLessons: number;
+  }[];
+  recentResults: {
+    type: 'quiz' | 'exam';
+    title: string;
+    score: number;
+    maxScore: number;
+    percentage: number;
+    passed: boolean;
+    submittedAt: string;
+  }[];
 }
 
 export interface StudentProgress {
@@ -178,6 +224,8 @@ export interface StudentProgress {
   overallPercentage: number;
   totalHoursWatched: number;
   lastStudiedAt: string;
+  completedCount?: number;
+  totalCount?: number;
 }
 
 export interface Certificate {

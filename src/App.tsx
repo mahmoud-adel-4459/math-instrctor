@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import { useAuthStore } from './store/useAuthStore';
+import { DeviceProvider } from './context/DeviceProvider';
 
 // Layouts
 import { MainLayout } from './components/layout/MainLayout';
@@ -12,6 +14,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 // Route Guards
 import { ProtectedRoute } from './app/routes/ProtectedRoute';
+import { GuestRoute } from './app/routes/GuestRoute';
 
 // Public Pages
 import { HomePage } from './pages/HomePage';
@@ -22,6 +25,7 @@ import { FaqPage } from './pages/FaqPage';
 import { ContactPage } from './pages/public/ContactPage';
 import { PrivacyPolicyPage } from './pages/public/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/public/TermsOfServicePage';
+import { NotFoundPage } from './pages/public/NotFoundPage';
 
 // Auth Pages
 import { LoginPage } from './pages/LoginPage';
@@ -37,16 +41,32 @@ import { QuizPage } from './pages/student/QuizPage';
 import { ExamPage } from './pages/student/ExamPage';
 import { ResultsPage } from './pages/student/ResultsPage';
 import { CertificatesPage } from './pages/student/CertificatesPage';
-import { OrdersPage } from './pages/student/OrdersPage';
 import { ProfilePage } from './pages/student/ProfilePage';
 import { NotificationsPage } from './pages/student/NotificationsPage';
+import { useThemeStore } from './store/useThemeStore';
 
 export const App: React.FC = () => {
+  const bootstrap = useAuthStore((state) => state.bootstrap);
+  const clearSession = useAuthStore((state) => state.clearSession);
+  const initTheme = useThemeStore((state) => state.initTheme);
+
+  useEffect(() => {
+    initTheme();
+    void bootstrap();
+  }, [bootstrap, initTheme]);
+
+  useEffect(() => {
+    const onExpired = () => clearSession();
+    window.addEventListener('student-session-expired', onExpired);
+    return () => window.removeEventListener('student-session-expired', onExpired);
+  }, [clearSession]);
+
   return (
     <ErrorBoundary>
       <HelmetProvider>
-        <BrowserRouter>
-          <Preloader />
+        <DeviceProvider>
+          <BrowserRouter>
+            <Preloader />
           <Routes>
             {/* PUBLIC WEBSITE ROUTES (Wrapped in MainLayout) */}
             <Route
@@ -118,17 +138,21 @@ export const App: React.FC = () => {
             <Route
               path="/login"
               element={
-                <MainLayout>
-                  <LoginPage />
-                </MainLayout>
+                <GuestRoute>
+                  <MainLayout>
+                    <LoginPage />
+                  </MainLayout>
+                </GuestRoute>
               }
             />
             <Route
               path="/register"
               element={
-                <MainLayout>
-                  <RegisterPage />
-                </MainLayout>
+                <GuestRoute>
+                  <MainLayout>
+                    <RegisterPage />
+                  </MainLayout>
+                </GuestRoute>
               }
             />
             <Route
@@ -222,16 +246,6 @@ export const App: React.FC = () => {
               }
             />
             <Route
-              path="/orders"
-              element={
-                <ProtectedRoute>
-                  <StudentLayout>
-                    <OrdersPage />
-                  </StudentLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/profile"
               element={
                 <ProtectedRoute>
@@ -273,10 +287,19 @@ export const App: React.FC = () => {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="*"
+              element={
+                <MainLayout>
+                  <NotFoundPage />
+                </MainLayout>
+              }
+            />
           </Routes>
         </BrowserRouter>
-      </HelmetProvider>
-    </ErrorBoundary>
+      </DeviceProvider>
+    </HelmetProvider>
+  </ErrorBoundary>
   );
 };
 

@@ -1,52 +1,57 @@
 import { apiClient, type ApiResponse } from './apiClient';
+import { mapQuiz, mapQuizAttempt, toAnswerPayload } from './mappers';
 import type { Quiz, QuizAttempt } from '../types';
-import { mockQuizzes, mockQuizAttempts } from '../mocks/data';
 
 export class QuizzesService {
   static async getQuizById(quizId: string): Promise<ApiResponse<Quiz | null>> {
-    const quiz = mockQuizzes[quizId] || mockQuizzes['quiz_calc_1'];
-    return apiClient.mockDelay(quiz || null);
+    const raw = await apiClient.get<any>(`/student/quizzes/${quizId}`);
+    return apiClient.wrap(mapQuiz(raw));
+  }
+
+  static async startAttempt(quizId: string): Promise<ApiResponse<{ attemptId: string; timeRemainingSeconds?: number }>> {
+    const raw = await apiClient.post<any>(`/student/quizzes/${quizId}/attempts`);
+    return apiClient.wrap({
+      attemptId: String(raw.id),
+      timeRemainingSeconds: raw.time_remaining_seconds ?? undefined,
+    });
+  }
+
+  static async saveAnswers(attemptId: string, answers: Record<string, string>): Promise<ApiResponse<null>> {
+    await apiClient.post(`/student/quizzes/attempts/${attemptId}/answers`, {
+      answers: toAnswerPayload(answers),
+    });
+    return apiClient.wrap(null);
+  }
+
+  static async submitAttempt(attemptId: string, fallback?: Partial<QuizAttempt>): Promise<ApiResponse<QuizAttempt>> {
+    const raw = await apiClient.post<any>(`/student/quizzes/attempts/${attemptId}/submit`);
+    return apiClient.wrap(mapQuizAttempt(raw, fallback));
+  }
+
+  static async getAttemptResult(attemptId: string, fallback?: Partial<QuizAttempt>): Promise<ApiResponse<QuizAttempt>> {
+    const raw = await apiClient.get<any>(`/student/quizzes/attempts/${attemptId}/result`);
+    return apiClient.wrap(mapQuizAttempt(raw, fallback));
   }
 
   static async submitQuizAttempt(
     quizId: string,
     answers: Record<string, string>,
-    timeSpentSeconds: number
+    timeSpentSeconds: number,
   ): Promise<ApiResponse<QuizAttempt>> {
-    const quiz = mockQuizzes[quizId] || mockQuizzes['quiz_calc_1'];
-    let score = 0;
-
-    if (quiz) {
-      quiz.questions.forEach((q) => {
-        if (answers[q.id] === q.correctOptionId) {
-          score += q.points;
-        }
-      });
-    }
-
-    const percentage = quiz ? Math.round((score / quiz.totalPoints) * 100) : 0;
-    const passed = quiz ? percentage >= quiz.passPercentage : false;
-
-    const attempt: QuizAttempt = {
-      id: `qa_${Date.now()}`,
+    const started = await QuizzesService.startAttempt(quizId);
+    await QuizzesService.saveAnswers(started.data.attemptId, answers);
+    return QuizzesService.submitAttempt(started.data.attemptId, {
       quizId,
-      quizTitle: quiz?.title || 'اختبار تفاعلي',
-      courseSlug: 'calculus-third-secondary',
-      studentId: 'stu_101',
       answers,
-      score,
-      totalPoints: quiz?.totalPoints || 20,
-      percentage,
-      passed,
-      completedAt: new Date().toLocaleString('ar-EG'),
       timeSpentSeconds,
-    };
-
-    mockQuizAttempts.unshift(attempt);
-    return apiClient.mockDelay(attempt);
+    });
   }
 
   static async getStudentQuizAttempts(): Promise<ApiResponse<QuizAttempt[]>> {
-    return apiClient.mockDelay(mockQuizAttempts);
+    const raw = await apiClient.get<any[]>('/student/results');
+    const quizzes = (raw || [])
+      .filter((item) => item.type === 'quiz')
+      .map((item) => mapQuizAttempt(item));
+    return apiClient.wrap(quizzes);
   }
 }

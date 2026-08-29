@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   HelpCircle,
   Search,
@@ -6,31 +6,32 @@ import {
   MessageCircle,
   BookOpen,
   FileCheck2,
-  CreditCard,
+  GraduationCap,
   UserCheck,
 } from 'lucide-react';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
+import { cmsService } from '../services/cms.service';
 
 interface FaqItem {
   id: string;
-  category: 'subscription' | 'videos' | 'exams' | 'support';
+  category: string;
   question: string;
   answer: string;
 }
 
-const FAQ_ITEMS: FaqItem[] = [
+const DEFAULT_FAQ_ITEMS: FaqItem[] = [
   {
     id: 'faq_1',
     category: 'subscription',
     question: 'كيف يمكنني الاشتراك في كورسات مادة الرياضيات؟',
-    answer: 'يمكنك الاشتراك بسهولة من خلال تصفح صفحة "الكورسات"، اختيار الصف الدراسي وفرع الرياضيات المطلوب، ثم الضغط على زر "دخول الكورس" واتباع خطوات تفعيل الاشتراك.',
+    answer: 'تصفح صفحة "الكورسات" واختر الصف وفرع الرياضيات المطلوب. التسجيل في الكورسات يتم بواسطة الإدارة بعد إنشاء حسابك، وستظهر المادة بعد التفعيل في صفحة كورساتي.',
   },
   {
     id: 'faq_2',
     category: 'subscription',
-    question: 'ما هي طرق الدفع المتاحة على المنصة؟',
-    answer: 'نوفر طرق دفع إلكترونية متعددة وآمنة تناسب الجميع: فودافون كاش (Vodafone Cash)، بطاقات المشتريات (Visa / Mastercard)، وفوري (Fawry).',
+    question: 'كيف يتم تفعيل الكورس بعد إنشاء الحساب؟',
+    answer: 'بعد تسجيلك في المنصة تتولى الإدارة تفعيل الكورسات المناسبة لك. لا يوجد شراء أو دفع إلكتروني من داخل التطبيق؛ عند التفعيل ستجد الكورس مباشرة في لوحة الطالب.',
   },
   {
     id: 'faq_3',
@@ -70,20 +71,49 @@ const FAQ_ITEMS: FaqItem[] = [
   },
 ];
 
+function mapFaqItems(rawItems: any[]): FaqItem[] {
+  return rawItems.map((item, idx) => ({
+    id: String(item.id || `faq_${idx}`),
+    category: item.category || 'subscription',
+    question: item.question || '',
+    answer: item.answer || '',
+  }));
+}
+
+function getInitialFaqItems(): FaqItem[] {
+  const cached = cmsService.getCachedPage('faq');
+  const itemsSection = cmsService.getSection<{ items?: any[] }>(cached, 'items');
+  if (itemsSection?.items && Array.isArray(itemsSection.items) && itemsSection.items.length > 0) {
+    return mapFaqItems(itemsSection.items);
+  }
+  return DEFAULT_FAQ_ITEMS;
+}
+
 export const FaqPage: React.FC = () => {
+  const [faqItems, setFaqItems] = useState<FaqItem[]>(getInitialFaqItems);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<string | null>('faq_1');
 
+  useEffect(() => {
+    cmsService.getPage('faq', true).then((payload) => {
+      if (!payload) return;
+      const itemsSection = cmsService.getSection<{ items?: any[] }>(payload, 'items');
+      if (itemsSection?.items && Array.isArray(itemsSection.items) && itemsSection.items.length > 0) {
+        setFaqItems(mapFaqItems(itemsSection.items));
+      }
+    });
+  }, []);
+
   const categories = [
     { id: 'all', label: 'جميع الأسئلة', icon: HelpCircle },
-    { id: 'subscription', label: 'الاشتراك والدفع', icon: CreditCard },
+    { id: 'subscription', label: 'التسجيل والكورسات', icon: GraduationCap },
     { id: 'videos', label: 'الشرح والمذكرات', icon: BookOpen },
     { id: 'exams', label: 'الامتحانات والتصحيح', icon: FileCheck2 },
     { id: 'support', label: 'الدعم ومتابعة الطالب', icon: UserCheck },
   ];
 
-  const filteredFaqs = FAQ_ITEMS.filter((item) => {
+  const filteredFaqs = faqItems.filter((item) => {
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
     const matchesSearch =
       searchQuery === '' ||
@@ -106,7 +136,7 @@ export const FaqPage: React.FC = () => {
           الأسئلة الشائعة والإجابات عنها
         </h1>
         <p className="text-sm text-slate-300 max-w-xl mx-auto">
-          إليك إجابات شاملة لأكثر الاستفسارات تكراراً حول الكورسات، طريقة الشرح، نظام الامتحانات، ووسائل الدفع.
+          إليك إجابات شاملة لأكثر الاستفسارات تكراراً حول الكورسات، طريقة الشرح، ونظام الامتحانات.
         </p>
       </div>
 

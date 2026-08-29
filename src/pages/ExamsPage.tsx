@@ -13,6 +13,7 @@ import { useExamStore, MOCK_EXAM_CALCULUS } from '../store/useExamStore';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 import { formatTimer } from '../utils/formatters';
+import { MathText } from '../components/common/MathText';
 
 export const ExamsPage: React.FC = () => {
   const {
@@ -136,7 +137,9 @@ export const ExamsPage: React.FC = () => {
                     <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center">
                       س{idx + 1}
                     </span>
-                    <h3 className="text-base font-bold text-white leading-relaxed">{q.text}</h3>
+                    <h3 className="text-base font-bold text-white leading-relaxed">
+                      <MathText text={q.text} />
+                    </h3>
                   </div>
                   <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 shrink-0">
                     {q.points} درجات
@@ -157,7 +160,7 @@ export const ExamsPage: React.FC = () => {
                             : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
                         }`}
                       >
-                        <span>{opt.text}</span>
+                        <MathText text={opt.text} />
                         <div
                           className={`w-5 h-5 rounded-full border flex items-center justify-center ${
                             isSelected
@@ -236,14 +239,14 @@ export const ExamsPage: React.FC = () => {
                       <XCircle className="w-5 h-5 text-rose-400" />
                     )}
                     <span className="text-xs font-bold text-white">
-                      س{idx + 1}: {q.text}
+                      س{idx + 1}: <MathText text={q.text} />
                     </span>
                   </div>
 
                   {q.explanation && (
                     <div className="mt-3 p-3 rounded-xl bg-slate-950 text-xs text-slate-300 border border-slate-800">
                       <strong className="text-indigo-400 font-bold">خطوات الحل والشرح: </strong>
-                      {q.explanation}
+                      <MathText text={q.explanation} />
                     </div>
                   )}
                 </div>

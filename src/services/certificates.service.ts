@@ -1,9 +1,14 @@
 import { apiClient, type ApiResponse } from './apiClient';
+import { mapCertificate } from './mappers';
 import type { Certificate } from '../types';
-import { mockCertificates } from '../mocks/data';
 
 export class CertificatesService {
   static async getStudentCertificates(): Promise<ApiResponse<Certificate[]>> {
-    return apiClient.mockDelay(mockCertificates);
+    try {
+      const result = await apiClient.getPaginated<any>('/student/certificates');
+      return apiClient.wrap(result.data.map(mapCertificate));
+    } catch {
+      return apiClient.wrap([]);
+    }
   }
 }

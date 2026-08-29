@@ -21,13 +21,12 @@ import { getCourseSchema, getBreadcrumbSchema } from '../../seo/structuredData';
 import { CoursesService } from '../../services/courses.service';
 import { useAuthStore } from '../../store/useAuthStore';
 import { GRADE_LEVELS } from '../../utils/constants';
-import { formatCurrency } from '../../utils/formatters';
 import type { Course } from '../../types';
 
 export const CourseDetailsPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { user, enrollInCourse } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const [course, setCourse] = useState<Course | null>(null);
   const [relatedCourses, setRelatedCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,15 +34,21 @@ export const CourseDetailsPage: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
-    CoursesService.getCourseBySlug(slug || 'calculus-third-secondary').then((res) => {
-      if (isMounted && res.data) {
-        setCourse(res.data);
-        CoursesService.getRelatedCourses(res.data.id).then((relRes) => {
-          if (isMounted) setRelatedCourses(relRes.data);
-        });
-      }
-      if (isMounted) setLoading(false);
-    });
+    CoursesService.getCourseBySlug(slug || '')
+      .then((res) => {
+        if (isMounted && res.data) {
+          setCourse(res.data);
+          CoursesService.getRelatedCourses(res.data.id).then((relRes) => {
+            if (isMounted) setRelatedCourses(relRes.data);
+          });
+        }
+      })
+      .catch(() => {
+        if (isMounted) setCourse(null);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
     return () => {
       isMounted = false;
     };
@@ -72,12 +77,15 @@ export const CourseDetailsPage: React.FC = () => {
   const gradeLabel = GRADE_LEVELS.find((g) => g.id === course.gradeLevel)?.label || 'الثانوية العامة';
 
   const handleEnrollClick = () => {
-    if (!user) {
-      navigate('/login');
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: { pathname: `/courses/${course.slug}` } } });
       return;
     }
-    enrollInCourse(course.id);
-    navigate(`/my-courses/${course.slug}`);
+    if (isEnrolled) {
+      navigate(`/my-courses/${course.slug}`);
+      return;
+    }
+    navigate('/my-courses');
   };
 
   const breadcrumbItems = [
@@ -209,19 +217,13 @@ export const CourseDetailsPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-3xl font-black text-white">
-                      {formatCurrency(course.discountPrice || course.price)}
-                    </span>
-                    {course.discountPrice && (
-                      <span className="text-sm text-slate-500 line-through">
-                        {formatCurrency(course.price)}
-                      </span>
-                    )}
-                  </div>
+                  <p className="text-sm font-bold text-white">التسجيل في الكورس يتم بواسطة الإدارة</p>
+                  <p className="text-xs text-slate-400">
+                    هذه منصة تعليمية خاصة. بعد تفعيل اشتراكك ستظهر المادة في صفحة كورساتي.
+                  </p>
                   <p className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
                     <ShieldCheck className="w-4 h-4" />
-                    وصول دائم وشامل لجميع تحديثات المادة
+                    وصول دائم للدروس والاختبارات بعد التسجيل
                   </p>
                 </div>
 
@@ -233,7 +235,7 @@ export const CourseDetailsPage: React.FC = () => {
                   </Link>
                 ) : (
                   <Button variant="primary" fullWidth size="lg" onClick={handleEnrollClick}>
-                    الاشترك الآن بالمنصة
+                    {isAuthenticated ? 'الانتقال إلى كورساتي' : 'تسجيل الدخول للمتابعة'}
                   </Button>
                 )}
 

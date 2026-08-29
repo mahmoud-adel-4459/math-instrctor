@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Star,
@@ -15,7 +15,6 @@ import { useCourseStore } from '../store/useCourseStore';
 import { GRADE_LEVELS, SUBJECT_BRANCHES } from '../utils/constants';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
-import { formatCurrency } from '../utils/formatters';
 import { SEOHead } from '../seo/SEOHead';
 import { getBreadcrumbSchema } from '../seo/structuredData';
 
@@ -28,19 +27,25 @@ export const CoursesPage: React.FC = () => {
     setSelectedBranch,
     searchQuery,
     setSearchQuery,
+    fetchCourses,
+    loading,
   } = useCourseStore();
 
-  const [priceSort, setPriceSort] = useState<'all' | 'low' | 'high'>('all');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
+  useEffect(() => {
+    if (courses.length === 0) {
+      void fetchCourses();
+    }
+  }, [courses.length, fetchCourses]);
 
   const resetFilters = () => {
     setSelectedGrade('all');
     setSelectedBranch('all');
     setSearchQuery('');
-    setPriceSort('all');
   };
 
-  let filteredCourses = courses.filter((c) => {
+  const filteredCourses = courses.filter((c) => {
     const matchesGrade = selectedGrade === 'all' || c.gradeLevel === selectedGrade;
     const matchesBranch = selectedBranch === 'all' || c.branch === selectedBranch;
     const matchesQuery =
@@ -50,21 +55,10 @@ export const CoursesPage: React.FC = () => {
     return matchesGrade && matchesBranch && matchesQuery;
   });
 
-  if (priceSort === 'low') {
-    filteredCourses = [...filteredCourses].sort(
-      (a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price)
-    );
-  } else if (priceSort === 'high') {
-    filteredCourses = [...filteredCourses].sort(
-      (a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price)
-    );
-  }
-
   const activeFiltersCount =
     (selectedGrade !== 'all' ? 1 : 0) +
     (selectedBranch !== 'all' ? 1 : 0) +
-    (searchQuery !== '' ? 1 : 0) +
-    (priceSort !== 'all' ? 1 : 0);
+    (searchQuery !== '' ? 1 : 0);
 
   return (
     <>
@@ -199,26 +193,12 @@ export const CoursesPage: React.FC = () => {
                 ))}
               </div>
             </div>
-
-            {/* Price Sort Filter */}
-            <div className="space-y-3 pt-2 border-t border-slate-800">
-              <label className="text-xs font-bold text-slate-300 block">ترتيب حسب السعر:</label>
-              <select
-                value={priceSort}
-                onChange={(e) => setPriceSort(e.target.value as 'all' | 'low' | 'high')}
-                className="w-full bg-slate-950/90 border border-slate-800 text-xs rounded-xl px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-              >
-                <option value="all">التلقائي</option>
-                <option value="low">السعر: من الأقل للأعلى</option>
-                <option value="high">السعر: من الأعلى للأقل</option>
-              </select>
-            </div>
           </aside>
 
           {/* MAIN COURSES GRID */}
           <main className="lg:col-span-3 space-y-6">
             <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>تم إيجاد {filteredCourses.length} كورس</span>
+              <span>{loading ? 'جاري التحميل...' : `تم إيجاد ${filteredCourses.length} كورس`}</span>
             </div>
 
             {filteredCourses.length === 0 ? (
@@ -272,23 +252,7 @@ export const CoursesPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Footer / Price / CTA */}
-                    <div className="p-5 pt-0 flex items-center justify-between border-t border-blue-900/30 mt-4">
-                      <div>
-                        {course.discountPrice ? (
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-lg font-black text-white">
-                              {formatCurrency(course.discountPrice)}
-                            </span>
-                            <span className="text-xs text-slate-500 line-through">
-                              {formatCurrency(course.price)}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-lg font-black text-white">{formatCurrency(course.price)}</span>
-                        )}
-                      </div>
-
+                    <div className="p-5 pt-0 flex items-center justify-end border-t border-blue-900/30 mt-4">
                       <Link to={`/courses/${course.slug}`}>
                         <Button variant="primary" size="sm" icon={ArrowLeft} iconPosition="left">
                           عرض الكورس

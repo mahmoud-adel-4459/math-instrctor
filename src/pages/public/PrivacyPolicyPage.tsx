@@ -50,7 +50,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             <ul className="list-disc list-inside space-y-2 text-slate-300">
               <li><strong>البيانات الشخصية:</strong> الاسم بالكامل، البريد الإلكتروني، رقم الهاتف، والسنة الدراسية.</li>
               <li><strong>البيانات الأكاديمية:</strong> سجل متابعة الحصص والدروس، ودرجات نتائج الكويزات والامتحانات.</li>
-              <li><strong>بيانات المعاملات:</strong> سجل طلبات الاشتراك واختيار طرق الدفع المتاحة.</li>
+              <li><strong>بيانات التسجيل:</strong> الكورسات التي فعّلتها الإدارة لحسابك وسجل المتابعة.</li>
             </ul>
           </div>
 
@@ -64,7 +64,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <span>إتاحة الوصول للكورسات والدروس والامتحانات المشتراة.</span>
+                <span>إتاحة الوصول للكورسات والدروس والامتحانات بعد تفعيل الإدارة.</span>
               </div>
               <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />

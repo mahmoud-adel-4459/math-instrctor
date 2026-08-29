@@ -7,18 +7,35 @@ import { ProgressBar } from '../../components/common/ProgressBar';
 import { Accordion } from '../../components/common/Accordion';
 import { SEOHead } from '../../seo/SEOHead';
 import { CoursesService } from '../../services/courses.service';
+import { ProgressService } from '../../services/progress.service';
 import type { Course } from '../../types';
 
 export const CourseLearningPage: React.FC = () => {
   const { courseSlug } = useParams<{ courseSlug: string }>();
   const [course, setCourse] = useState<Course | null>(null);
+  const [progressPct, setProgressPct] = useState(0);
+  const [completedLessons, setCompletedLessons] = useState(0);
+  const [totalLessons, setTotalLessons] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    CoursesService.getCourseBySlug(courseSlug || 'calculus-third-secondary').then((res) => {
-      if (res.data) setCourse(res.data);
-      setLoading(false);
-    });
+    if (!courseSlug) return;
+    setLoading(true);
+    CoursesService.getStudentCourseBySlug(courseSlug)
+      .then(async (res) => {
+        if (res.data) {
+          setCourse(res.data);
+          try {
+            const progress = await ProgressService.getCourseProgress(res.data.id);
+            setProgressPct(progress.data.overallPercentage);
+            setCompletedLessons(progress.data.completedCount || progress.data.completedLessonIds.length);
+            setTotalLessons(progress.data.totalCount || res.data.lessonsCount || res.data.chapters.reduce((sum, chap) => sum + chap.lessons.length, 0));
+          } catch {
+            setTotalLessons(res.data.lessonsCount || 0);
+          }
+        }
+      })
+      .finally(() => setLoading(false));
   }, [courseSlug]);
 
   if (loading) return <div className="text-center py-12 text-slate-400">جاري تحميل محتوى الكورس...</div>;
@@ -61,23 +78,24 @@ export const CourseLearningPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Chapter Quiz CTA */}
-        {chapter.quizId && (
-          <div className="p-4 rounded-xl glass-panel border border-cyan-500/30 flex items-center justify-between">
+        {(chapter.quizIds?.length ? chapter.quizIds : chapter.quizId ? [chapter.quizId] : []).map((quizId, quizIndex) => (
+          <div key={quizId} className="p-4 rounded-xl glass-panel border border-cyan-500/30 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <HelpCircle className="w-5 h-5 text-cyan-400" />
               <div>
-                <h4 className="text-xs font-bold text-white">كويز تفاعلي على الوحدة</h4>
+                <h4 className="text-xs font-bold text-white">
+                  {quizIndex === 0 ? 'كويز تفاعلي على الوحدة' : `كويز إضافي ${quizIndex + 1}`}
+                </h4>
                 <p className="text-[11px] text-slate-400">اختبر معلوماتك وفهمك لدروس الوحدة</p>
               </div>
             </div>
-            <Link to={`/my-courses/${course.slug}/quiz/${chapter.quizId}`}>
+            <Link to={`/my-courses/${course.slug}/quiz/${quizId}`}>
               <Button variant="cyan" size="sm">
                 ابدأ الكويز
               </Button>
             </Link>
           </div>
-        )}
+        ))}
       </div>
     ),
   }));
@@ -107,10 +125,10 @@ export const CourseLearningPage: React.FC = () => {
 
           <div className="pt-4 border-t border-slate-800/80 space-y-2">
             <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
-              <span>تقدمك العام في الكورس: 50%</span>
-              <span className="text-cyan-400 font-bold">2 / 7 دروس مكتملة</span>
+              <span>تقدمك العام في الكورس: {Math.round(progressPct)}%</span>
+              <span className="text-cyan-400 font-bold">{completedLessons} / {totalLessons} دروس مكتملة</span>
             </div>
-            <ProgressBar progress={50} />
+            <ProgressBar progress={progressPct} />
           </div>
         </div>
 
@@ -131,11 +149,17 @@ export const CourseLearningPage: React.FC = () => {
               <p className="text-xs text-slate-300 leading-relaxed">
                 امتحان محاكاة كامل لمواصفات الثانوية العامة (بابل شيت وتصحيح إلكتروني).
               </p>
-              <Link to={`/my-courses/${course.slug}/exam/exam_calc_final`}>
-                <Button variant="primary" fullWidth size="md">
-                  دخول الامتحان النهائي
+              {course.chapters.find((chapter) => chapter.examId)?.examId ? (
+                <Link to={`/my-courses/${course.slug}/exam/${course.chapters.find((chapter) => chapter.examId)?.examId}`}>
+                  <Button variant="primary" fullWidth size="md">
+                    دخول الامتحان النهائي
+                  </Button>
+                </Link>
+              ) : (
+                <Button variant="primary" fullWidth size="md" disabled>
+                  لا يوجد امتحان نهائي بعد
                 </Button>
-              </Link>
+              )}
             </div>
 
             {/* Certificate Box */}

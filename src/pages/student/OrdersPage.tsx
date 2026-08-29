@@ -28,6 +28,10 @@ export const OrdersPage: React.FC = () => {
 
         {loading ? (
           <div className="text-center text-slate-400 py-12">جاري تحميل المعاملات...</div>
+        ) : orders.length === 0 ? (
+          <div className="glass-panel p-10 rounded-3xl text-center text-slate-400">
+            نظام الطلبات غير مفعّل حالياً. التسجيل في الكورسات يتم من خلال الإدارة.
+          </div>
         ) : (
           <div className="glass-panel rounded-3xl border border-blue-900/40 overflow-hidden">
             <div className="overflow-x-auto">

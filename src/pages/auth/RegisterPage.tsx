@@ -3,12 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, Lock, UserPlus } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { SEOHead } from '../../seo/SEOHead';
-import { AuthService } from '../../services/auth.service';
 import { useAuthStore } from '../../store/useAuthStore';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const loginStore = useAuthStore((state) => state.login);
+  const { register, loading, error, clearError } = useAuthStore();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,27 +16,27 @@ export const RegisterPage: React.FC = () => {
     confirmPassword: '',
     gradeLevel: 'sec_3',
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      setError('كلمة المرور وتأكيد كلمة المرور غير متطابقتين');
+      setLocalError('كلمة المرور وتأكيد كلمة المرور غير متطابقتين');
       return;
     }
-    setLoading(true);
-    setError('');
+    setLocalError('');
+    clearError();
     try {
-      const res = await AuthService.register(formData);
-      if (res.data) {
-        loginStore(res.data.user.email);
-        navigate('/dashboard');
-      }
+      await register({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      });
+      navigate('/dashboard');
     } catch {
-      setError('حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة لاحقاً');
-    } finally {
-      setLoading(false);
+      /* store error is shown */
     }
   };
 
@@ -61,9 +60,9 @@ export const RegisterPage: React.FC = () => {
             <p className="text-xs text-slate-400">سجل بياناتك للبدء في متابعة الكورسات والامتحانات</p>
           </div>
 
-          {error && (
+          {(localError || error) && (
             <div className="p-3.5 rounded-xl bg-red-950/60 border border-red-500/30 text-xs text-red-300">
-              {error}
+              {localError || error}
             </div>
           )}
 
@@ -158,6 +157,7 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <Button
+              type="submit"
               variant="primary"
               fullWidth
               size="lg"

@@ -138,7 +138,7 @@ export const useExamStore = create<ExamState>((set, get) => ({
 
     let totalScore = 0;
     currentExam.questions.forEach((q: Question) => {
-      if (answers[q.id] === q.correctOptionId) {
+      if (q.correctOptionId && answers[q.id] === q.correctOptionId) {
         totalScore += q.points;
       }
     });

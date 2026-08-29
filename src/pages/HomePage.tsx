@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BookOpen,
@@ -22,11 +22,37 @@ import {
   HADITH,
 } from '../utils/constants';
 import { useCourseStore } from '../store/useCourseStore';
-import { formatCurrency } from '../utils/formatters';
 import { HeroSlider } from '../components/home/HeroSlider';
+import { cmsService, type CmsPagePayload } from '../services/cms.service';
 
 export const HomePage: React.FC = () => {
-  const { courses } = useCourseStore();
+  const { courses, fetchCourses, loading } = useCourseStore();
+  const [cmsHome, setCmsHome] = React.useState<CmsPagePayload | null>(() => cmsService.getCachedPage('home'));
+
+  useEffect(() => {
+    void fetchCourses();
+    cmsService.getPage('home', true).then((payload) => {
+      if (payload) setCmsHome(payload);
+    });
+  }, [fetchCourses]);
+
+  const mottoData = cmsService.getSection<{
+    ayah?: string;
+    hadith?: string;
+    instructor_name?: string;
+    tagline?: string;
+  }>(cmsHome, 'motto');
+
+  const subjectsData = cmsService.getSection<{
+    title?: string;
+    subtitle?: string;
+    items?: Array<{ id: string; title: string; slug: string; description?: string }>;
+  }>(cmsHome, 'subjects');
+
+  const displayedAyah = mottoData?.ayah || QURAN_VERSES[0].text;
+  const displayedHadith = mottoData?.hadith || HADITH;
+  const displayedInstructor = mottoData?.instructor_name || INSTRUCTOR_NAME;
+  const displayedTagline = mottoData?.tagline || PLATFORM_MOTTO;
 
   return (
     <div className="space-y-20 pb-20">
@@ -43,11 +69,11 @@ export const HomePage: React.FC = () => {
           </div>
 
           <h2 className="text-xl sm:text-3xl font-black text-amber-300 font-serif leading-relaxed max-w-3xl mx-auto">
-            «{QURAN_VERSES[0].text}»
+            «{displayedAyah}»
           </h2>
 
           <p className="text-xs sm:text-sm text-cyan-200 font-semibold max-w-2xl mx-auto">
-            قال رسول الله ﷺ: «{HADITH}»
+            قال رسول الله ﷺ: «{displayedHadith}»
           </p>
 
           <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
@@ -56,13 +82,13 @@ export const HomePage: React.FC = () => {
                 <Award className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-extrabold text-white">{INSTRUCTOR_NAME}</h4>
+                <h4 className="font-extrabold text-white">{displayedInstructor}</h4>
                 <p className="text-slate-400">{INSTRUCTOR_TITLE}</p>
               </div>
             </div>
 
             <div className="px-4 py-2 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs font-extrabold text-blue-300">
-              «{PLATFORM_MOTTO}»
+              «{displayedTagline}»
             </div>
           </div>
         </div>
@@ -72,9 +98,9 @@ export const HomePage: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-3 mb-12">
           <Badge variant="cyan">التخصص والدقة</Badge>
-          <h2 className="text-3xl font-extrabold text-white">فروع مادة الرياضيات بالشرح المبسط</h2>
+          <h2 className="text-3xl font-extrabold text-white">{subjectsData?.title || 'فروع مادة الرياضيات بالشرح المبسط'}</h2>
           <p className="text-sm text-slate-400 max-w-2xl mx-auto">
-            تغطي منصتنا جميع فروع الرياضيات للثانوية العامة والإعدادية مقسمة ومبسطة بشكل علمي مدروس مع {INSTRUCTOR_NAME}.
+            {subjectsData?.subtitle || `تغطي منصتنا جميع فروع الرياضيات للثانوية العامة والإعدادية مقسمة ومبسطة بشكل علمي مدروس مع ${displayedInstructor}.`}
           </p>
         </div>
 
@@ -123,7 +149,10 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {courses.map((course) => (
+          {loading && courses.length === 0 && (
+            <div className="col-span-full text-center text-slate-400 py-8">جاري تحميل الكورسات...</div>
+          )}
+          {courses.slice(0, 6).map((course) => (
             <div
               key={course.id}
               className="glass-panel glass-panel-hover rounded-3xl overflow-hidden border border-blue-900/40 flex flex-col justify-between"
@@ -163,7 +192,7 @@ export const HomePage: React.FC = () => {
                   <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
                     <span className="flex items-center gap-1">
                       <BookOpen className="w-4 h-4 text-blue-400" />
-                      {course.chapters.length} فصول مقسمة
+                      {(course.chapters.length || course.lessonsCount || 0)} دروس
                     </span>
                     <span className="flex items-center gap-1">
                       <FileText className="w-4 h-4 text-cyan-400" />
@@ -173,19 +202,7 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Price & CTA */}
-              <div className="p-6 pt-0 flex items-center justify-between border-t border-blue-900/30 mt-4">
-                <div>
-                  {course.discountPrice ? (
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-lg font-black text-white">{formatCurrency(course.discountPrice)}</span>
-                      <span className="text-xs text-slate-500 line-through">{formatCurrency(course.price)}</span>
-                    </div>
-                  ) : (
-                    <span className="text-lg font-black text-white">{formatCurrency(course.price)}</span>
-                  )}
-                </div>
-
+              <div className="p-6 pt-0 flex items-center justify-end border-t border-blue-900/30 mt-4">
                 <Link to={`/courses/${course.slug}`}>
                   <Button variant="primary" size="sm" icon={ArrowLeft} iconPosition="left">
                     عرض الكورس

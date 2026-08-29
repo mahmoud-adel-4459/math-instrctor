@@ -20,13 +20,49 @@ import {
   QURAN_VERSES,
   HADITH,
 } from '../utils/constants';
+import { cmsService, type CmsPagePayload } from '../services/cms.service';
 
 export const AboutUsPage: React.FC = () => {
+  const [cmsAbout, setCmsAbout] = React.useState<CmsPagePayload | null>(() => cmsService.getCachedPage('about'));
+
+  React.useEffect(() => {
+    cmsService.getPage('about', true).then((payload) => {
+      if (payload) setCmsAbout(payload);
+    });
+  }, []);
+
+  const heroData = cmsService.getSection<{
+    title?: string;
+    subtitle?: string;
+    tagline?: string;
+  }>(cmsAbout, 'hero');
+
+  const instructorData = cmsService.getSection<{
+    name?: string;
+    title?: string;
+    experience_years?: string;
+    avatar?: string;
+    bio?: string;
+  }>(cmsAbout, 'instructor');
+
+  const visionMissionData = cmsService.getSection<{
+    vision?: string;
+    mission?: string;
+  }>(cmsAbout, 'vision_mission');
+
+  const displayedTitle = heroData?.title || 'عن منصة Math with Kabil';
+  const displayedSubtitle = heroData?.subtitle || 'مرحبًا بكم في Math with Kabil… منصة تعليمية أُنشئت لتكون رفيقًا لكل طالب يسعى إلى التفوق، وإتقان الرياضيات.';
+  const displayedMotto = heroData?.tagline || PLATFORM_MOTTO;
+  const displayedInstructorName = instructorData?.name || INSTRUCTOR_NAME;
+  const displayedInstructorTitle = instructorData?.title || INSTRUCTOR_TITLE;
+  const displayedVision = visionMissionData?.vision || PLATFORM_VISION;
+  const displayedMission = visionMissionData?.mission || PLATFORM_MISSION;
+
   return (
     <>
       <SEOHead
-        title={`عن المنصة والأستاذ — ${INSTRUCTOR_NAME}`}
-        description={`${INSTRUCTOR_NAME} - ${INSTRUCTOR_TITLE}. رؤيتنا ورسالتنا وقيمنا في تعليم الرياضيات لطلاب الثانوية العامة والإعدادية.`}
+        title={cmsAbout?.seo?.title || `عن المنصة والأستاذ — ${displayedInstructorName}`}
+        description={cmsAbout?.seo?.description || `${displayedInstructorName} - ${displayedInstructorTitle}. رؤيتنا ورسالتنا وقيمنا في تعليم الرياضيات.`}
         canonical="https://math-instrctor.vercel.app/about"
       />
 
@@ -39,15 +75,15 @@ export const AboutUsPage: React.FC = () => {
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight">
-            عن منصة <span className="text-gradient">Math with Kabil</span>
+            {displayedTitle}
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            مرحبًا بكم في Math with Kabil… منصة تعليمية أُنشئت لتكون رفيقًا لكل طالب يسعى إلى التفوق، وإتقان الرياضيات، وبناء مستقبل مشرق بعلمٍ نافع وعملٍ صالح.
+            {displayedSubtitle}
           </p>
 
           <div className="p-4 max-w-2xl mx-auto rounded-2xl bg-blue-950/40 border border-blue-500/30 text-xs sm:text-sm font-semibold text-blue-300">
-            «{PLATFORM_MOTTO}»
+            «{displayedMotto}»
           </div>
 
           {/* Glow backdrop */}
@@ -151,7 +187,7 @@ export const AboutUsPage: React.FC = () => {
               <Target className="w-7 h-7" />
             </div>
             <h3 className="text-xl font-black text-white">رؤيتنا</h3>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{PLATFORM_VISION}</p>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{displayedVision}</p>
           </div>
 
           {/* Mission */}
@@ -160,7 +196,7 @@ export const AboutUsPage: React.FC = () => {
               <Compass className="w-7 h-7" />
             </div>
             <h3 className="text-xl font-black text-white">رسالتنا</h3>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{PLATFORM_MISSION}</p>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{displayedMission}</p>
           </div>
         </div>
 

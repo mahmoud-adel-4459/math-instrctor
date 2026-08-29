@@ -40,12 +40,7 @@ export const getCourseSchema = (course: Course) => ({
     '@type': 'Person',
     name: course.instructorName,
   },
-  offers: {
-    '@type': 'Offer',
-    price: course.discountPrice || course.price,
-    priceCurrency: 'EGP',
-    availability: 'https://schema.org/InStock',
-  },
+  isAccessibleForFree: true,
   aggregateRating: {
     '@type': 'AggregateRating',
     ratingValue: course.rating,
